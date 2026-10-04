@@ -36,7 +36,6 @@ async function refreshAccessToken(token: JWT): Promise<JWT> {
       ...token,
       accessToken: data.access_token,
       expiresAt: Math.floor(Date.now() / 1000) + data.expires_in,
-      // Spotify ne renvoie pas toujours un nouveau refresh_token
       refreshToken: data.refresh_token ?? token.refreshToken,
       error: undefined,
     }
@@ -47,7 +46,6 @@ async function refreshAccessToken(token: JWT): Promise<JWT> {
 }
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
-  // debug: true, // à n'activer que ponctuellement : les logs contiennent le client secret
   providers: [
     Spotify({
       authorization: {
@@ -77,14 +75,12 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   ],
   pages: { signIn: "/" },
   callbacks: {
-    // Utilisé par proxy.ts pour protéger les routes
     authorized({ auth, request: { nextUrl } }) {
       if (nextUrl.pathname.startsWith("/dashboard")) return !!auth
       return true
     },
 
     async jwt({ token, account }) {
-      // Première connexion : on stocke les tokens Spotify
       if (account) {
         return {
           ...token,
@@ -94,10 +90,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         }
       }
 
-      // Token encore valide
       if (token.expiresAt && Date.now() < token.expiresAt * 1000) return token
 
-      // Token expiré : on le rafraîchit
       return refreshAccessToken(token)
     },
 

@@ -6,7 +6,6 @@ import {
   spotifyGet,
   type Artist,
   type Range,
-  type RecentItem,
   type Track,
 } from "@/lib/spotify"
 
@@ -22,7 +21,7 @@ export default async function Dashboard({
   const range: Range = r && r in RANGES ? (r as Range) : "short_term"
   const token = session.accessToken!
 
-  const [artists, tracks, recent] = await Promise.all([
+  const [artists, tracks] = await Promise.all([
     spotifyGet<{ items: Artist[] }>(
       token,
       `/me/top/artists?limit=10&time_range=${range}`
@@ -31,28 +30,7 @@ export default async function Dashboard({
       token,
       `/me/top/tracks?limit=10&time_range=${range}`
     ),
-    spotifyGet<{ items: RecentItem[] }>(
-      token,
-      "/me/player/recently-played?limit=50"
-    ),
   ])
-
-  // Temps d'écoute par jour (50 dernières écoutes seulement, durée complète des titres)
-  const byDay = new Map<string, { label: string; ms: number }>()
-  for (const { played_at, track } of recent?.items ?? []) {
-    const d = new Date(played_at)
-    const key = d.toLocaleDateString("sv-SE")
-    const label = d.toLocaleDateString("fr-FR", {
-      weekday: "short",
-      day: "numeric",
-      month: "short",
-    })
-    byDay.set(key, { label, ms: (byDay.get(key)?.ms ?? 0) + track.duration_ms })
-  }
-  const days = [...byDay.entries()].sort(([a], [b]) => a.localeCompare(b))
-  const totalMin = Math.round(days.reduce((s, [, d]) => s + d.ms, 0) / 60000)
-  const maxMs = Math.max(1, ...days.map(([, d]) => d.ms))
-  const avgMin = days.length ? Math.round(totalMin / days.length) : 0
 
   return (
     <main className="mx-auto max-w-3xl space-y-10 p-8 text-white">
@@ -86,39 +64,6 @@ export default async function Dashboard({
           </Link>
         ))}
       </nav>
-
-      {/* Temps d'écoute */}
-      <section>
-        <h2 className="mb-1 text-xl font-semibold">Temps d&apos;écoute récent</h2>
-        <p className="mb-4 text-sm text-neutral-500">
-          Basé sur tes 50 dernières écoutes (limite de l&apos;API Spotify) :
-          estimation, pas un total sur la période choisie.
-        </p>
-        <div className="mb-4 flex gap-8">
-          <div>
-            <p className="text-4xl font-bold">{totalMin.toLocaleString("fr-FR")}</p>
-            <p className="text-sm text-neutral-400">minutes au total</p>
-          </div>
-          <div>
-            <p className="text-4xl font-bold">{avgMin}</p>
-            <p className="text-sm text-neutral-400">min / jour en moyenne</p>
-          </div>
-        </div>
-        <ul className="space-y-2">
-          {days.map(([key, d]) => (
-            <li key={key} className="flex items-center gap-3 text-sm">
-              <span className="w-28 shrink-0 text-neutral-400">{d.label}</span>
-              <div className="h-3 flex-1 rounded-full bg-neutral-800">
-                <div
-                  className="h-3 rounded-full bg-[#1DB954]"
-                  style={{ width: `${(d.ms / maxMs) * 100}%` }}
-                />
-              </div>
-              <span className="w-16 text-right">{Math.round(d.ms / 60000)} min</span>
-            </li>
-          ))}
-        </ul>
-      </section>
 
       <div className="grid gap-10 md:grid-cols-2">
         {/* Top titres */}
