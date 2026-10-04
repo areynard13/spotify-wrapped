@@ -9,6 +9,71 @@ import {
   type Track,
 } from "@/lib/spotify"
 
+type Item = {
+  id: string
+  title: string
+  subtitle: string
+  image?: string
+  round?: boolean
+}
+
+function Top({ title, items }: { title: string; items: Item[] }) {
+  const [first, ...rest] = items
+  if (!first) return null
+
+  return (
+    <section>
+      <h2 className="mb-3 text-lg font-semibold sm:text-xl">{title}</h2>
+
+      {/* N°1 mis en avant */}
+      <div className="mb-2 flex items-center gap-4 rounded-2xl bg-gradient-to-br from-[#1DB954]/30 to-neutral-900 p-3 sm:p-4">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={first.image}
+          alt=""
+          className={`h-24 w-24 shrink-0 object-cover sm:h-28 sm:w-28 ${
+            first.round ? "rounded-full" : "rounded-xl"
+          }`}
+        />
+        <div className="min-w-0">
+          <p className="text-xs font-semibold uppercase tracking-wider text-[#1DB954]">
+            N°1
+          </p>
+          <p className="line-clamp-2 text-lg font-bold leading-tight sm:text-xl">
+            {first.title}
+          </p>
+          <p className="truncate text-sm text-neutral-300">{first.subtitle}</p>
+        </div>
+      </div>
+
+      <ol className="space-y-1" start={2}>
+        {rest.map((item, i) => (
+          <li
+            key={item.id}
+            className="flex items-center gap-3 rounded-xl p-2 active:bg-neutral-900"
+          >
+            <span className="w-6 shrink-0 text-center text-sm text-neutral-500">
+              {i + 2}
+            </span>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={item.image}
+              alt=""
+              className={`h-12 w-12 shrink-0 object-cover ${
+                item.round ? "rounded-full" : "rounded-md"
+              }`}
+            />
+            <div className="min-w-0">
+              <p className="truncate font-medium">{item.title}</p>
+              <p className="truncate text-sm text-neutral-400">{item.subtitle}</p>
+            </div>
+          </li>
+        ))}
+      </ol>
+    </section>
+  )
+}
+
 export default async function Dashboard({
   searchParams,
 }: {
@@ -32,88 +97,65 @@ export default async function Dashboard({
     ),
   ])
 
+  const trackItems: Item[] = (tracks?.items ?? []).map((t) => ({
+    id: t.id,
+    title: t.name,
+    subtitle: t.artists.map((a) => a.name).join(", "),
+    image: t.album.images[0]?.url,
+  }))
+
+  const artistItems: Item[] = (artists?.items ?? []).map((a) => ({
+    id: a.id,
+    title: a.name,
+    subtitle: a.genres?.slice(0, 2).join(", ") ?? "",
+    image: a.images[0]?.url,
+    round: true,
+  }))
+
   return (
-    <main className="mx-auto max-w-3xl space-y-10 p-8 text-white">
-      <header className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold">Salut {session.user?.name} 👋</h1>
-        <form
-          action={async () => {
-            "use server"
-            await signOut({ redirectTo: process.env.AUTH_URL })
-          }}
-        >
-          <button className="text-sm text-neutral-400 underline">
-            Déconnexion
-          </button>
-        </form>
-      </header>
-
-      {/* Sélecteur de période */}
-      <nav className="flex gap-2">
-        {(Object.keys(RANGES) as Range[]).map((key) => (
-          <Link
-            key={key}
-            href={`/dashboard?range=${key}`}
-            className={`rounded-full px-4 py-2 text-sm font-medium transition ${
-              key === range
-                ? "bg-[#1DB954] text-black"
-                : "bg-neutral-800 text-neutral-300 hover:bg-neutral-700"
-            }`}
+    <div className="min-h-screen bg-black text-white">
+      <main className="mx-auto max-w-3xl px-4 pb-[max(2.5rem,env(safe-area-inset-bottom))] sm:px-8">
+        <header className="flex items-center justify-between gap-3 pt-6 sm:pt-8">
+          <h1 className="min-w-0 truncate text-xl font-bold sm:text-3xl">
+            Salut {session.user?.name} 👋
+          </h1>
+          <form
+            action={async () => {
+              "use server"
+              await signOut({ redirectTo: process.env.AUTH_URL })
+            }}
           >
-            {RANGES[key]}
-          </Link>
-        ))}
-      </nav>
+            <button className="-mr-2 rounded-lg px-2 py-2 text-sm text-neutral-400 active:bg-neutral-900">
+              Déconnexion
+            </button>
+          </form>
+        </header>
 
-      <div className="grid gap-10 md:grid-cols-2">
-        {/* Top titres */}
-        <section>
-          <h2 className="mb-4 text-xl font-semibold">Top titres</h2>
-          <ol className="space-y-3">
-            {tracks?.items.map((t, i) => (
-              <li key={t.id} className="flex items-center gap-3">
-                <span className="w-5 text-neutral-500">{i + 1}</span>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={t.album.images.at(-1)?.url}
-                  alt=""
-                  className="h-12 w-12 rounded object-cover"
-                />
-                <div className="min-w-0">
-                  <p className="truncate font-medium">{t.name}</p>
-                  <p className="truncate text-sm text-neutral-400">
-                    {t.artists.map((a) => a.name).join(", ")}
-                  </p>
-                </div>
-              </li>
+        {/* Sélecteur de période : reste visible au scroll */}
+        <nav className="sticky top-0 z-10 -mx-4 bg-black/80 px-4 py-3 backdrop-blur sm:mx-0 sm:px-0">
+          <div className="grid grid-cols-3 gap-1 rounded-full bg-neutral-900 p-1">
+            {(Object.keys(RANGES) as Range[]).map((key) => (
+              <Link
+                key={key}
+                href={`/dashboard?range=${key}`}
+                scroll={false}
+                className={`rounded-full py-2 text-center text-sm font-medium transition ${
+                  key === range
+                    ? "bg-[#1DB954] text-black"
+                    : "text-neutral-300 active:bg-neutral-800"
+                }`}
+              >
+                {RANGES[key]}
+              </Link>
             ))}
-          </ol>
-        </section>
+          </div>
+        </nav>
 
-        {/* Top artistes */}
-        <section>
-          <h2 className="mb-4 text-xl font-semibold">Top artistes</h2>
-          <ol className="space-y-3">
-            {artists?.items.map((a, i) => (
-              <li key={a.id} className="flex items-center gap-3">
-                <span className="w-5 text-neutral-500">{i + 1}</span>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={a.images.at(-1)?.url}
-                  alt=""
-                  className="h-12 w-12 rounded-full object-cover"
-                />
-                <div className="min-w-0">
-                  <p className="truncate font-medium">{a.name}</p>
-                  <p className="truncate text-sm text-neutral-400">
-                    {a.genres?.slice(0, 2).join(", ")}
-                  </p>
-                </div>
-              </li>
-            ))}
-          </ol>
-        </section>
-      </div>
-    </main>
+        <div className="mt-4 grid gap-8 md:grid-cols-2 md:gap-10">
+          <Top title="Top titres" items={trackItems} />
+          <Top title="Top artistes" items={artistItems} />
+        </div>
+      </main>
+    </div>
   )
 }

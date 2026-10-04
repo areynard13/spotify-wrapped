@@ -6,11 +6,16 @@ export default async function Home() {
   if (session && !session.error) redirect("/dashboard")
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center gap-6 bg-black text-white">
-      <h1 className="text-5xl font-bold">Mon Spotify Wrapped</h1>
-      <p className="text-neutral-400">
-        Connecte-toi pour découvrir tes stats musicales.
-      </p>
+    <main className="flex min-h-dvh flex-col items-center justify-center gap-8 bg-black px-6 text-center text-white">
+      <div className="space-y-3">
+        <h1 className="text-4xl font-extrabold sm:text-5xl">
+          Mon Spotify <span className="text-[#1DB954]">Wrapped</span>
+        </h1>
+        <p className="text-neutral-400">
+          Tes top titres et artistes, quand tu veux.
+        </p>
+      </div>
+
       <form
         action={async () => {
           "use server"
@@ -18,10 +23,11 @@ export default async function Home() {
             redirectTo: `${process.env.AUTH_URL}/dashboard`,
           })
         }}
+        className="w-full max-w-xs"
       >
         <button
           type="submit"
-          className="rounded-full bg-[#1DB954] px-8 py-3 font-semibold text-black transition hover:scale-105"
+          className="w-full rounded-full bg-[#1DB954] px-8 py-4 font-bold text-black transition active:scale-95"
         >
           Se connecter avec Spotify
         </button>
