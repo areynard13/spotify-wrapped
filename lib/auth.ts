@@ -73,7 +73,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       },
     }),
   ],
-  pages: { signIn: "/" },
+  pages: { signIn: "/", error: "/auth/error" },
   callbacks: {
     authorized({ auth, request: { nextUrl } }) {
       if (nextUrl.pathname.startsWith("/dashboard")) return !!auth

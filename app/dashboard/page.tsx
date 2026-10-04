@@ -1,6 +1,6 @@
 import Link from "next/link"
 import { redirect } from "next/navigation"
-import { auth, signOut } from "@/lib/auth"
+import { auth, signOut } from "@/auth"
 import {
   RANGES,
   spotifyGet,
@@ -96,6 +96,29 @@ export default async function Dashboard({
       `/me/top/tracks?limit=10&time_range=${range}`
     ),
   ])
+
+  if (!artists && !tracks) {
+    return (
+      <main className="flex min-h-dvh flex-col items-center justify-center gap-5 bg-black px-6 text-center text-white">
+        <h1 className="text-2xl font-bold">Accès non autorisé</h1>
+        <p className="max-w-xs text-sm text-neutral-400">
+          Cette app est en accès limité par Spotify. Envoie le nom et l&apos;e-mail
+          de ton compte Spotify à son auteur pour qu&apos;il t&apos;ajoute à la liste
+          des utilisateurs.
+        </p>
+        <form
+          action={async () => {
+            "use server"
+            await signOut({ redirectTo: process.env.AUTH_URL })
+          }}
+        >
+          <button className="rounded-full bg-neutral-800 px-6 py-3 text-sm font-medium active:bg-neutral-700">
+            Se déconnecter
+          </button>
+        </form>
+      </main>
+    )
+  }
 
   const trackItems: Item[] = (tracks?.items ?? []).map((t) => ({
     id: t.id,
