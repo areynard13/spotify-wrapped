@@ -9,7 +9,7 @@ export type Range = keyof typeof RANGES
 export type Artist = {
   id: string
   name: string
-  genres?: string[]
+  genres: string[]
   images: { url: string }[]
 }
 
@@ -18,7 +18,7 @@ export type Track = {
   name: string
   duration_ms: number
   artists: { name: string }[]
-  album: { images: { url: string }[] }
+  album: { images: { url: string }[]; release_date?: string }
 }
 
 export type RecentItem = { played_at: string; track: Track }
