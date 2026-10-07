@@ -147,10 +147,21 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
           </section>
         )}
 
-        <a href={`/api/share?range=${range}`} download="wrapped.png"
-          className="mt-4 block rounded-full bg-[#1DB954] py-3 text-center font-bold text-black active:scale-95">
-          Créer ma carte à partager
-        </a>
+        <div className="mt-4 flex flex-col gap-2.5 sm:flex-row">
+          <Link
+            href={`/dashboard/story?range=${range}`}
+            className="flex-1 rounded-full bg-[#1DB954] py-3 text-center font-bold text-black transition active:scale-95"
+          >
+            Voir ma Story
+          </Link>
+          <a
+            href={`/api/share?range=${range}`}
+            download="wrapped.png"
+            className="flex-1 rounded-full bg-neutral-800 py-3 text-center font-bold text-white transition active:scale-95 hover:bg-neutral-700"
+          >
+            Créer ma carte à partager
+          </a>
+        </div>
 
         <div className="mt-8 grid gap-8 md:grid-cols-2 md:gap-10">
           <Top title="Top titres" items={trackItems} />
