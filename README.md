@@ -1,6 +1,6 @@
 # Spotify Wrapped
 
-A Next.js app that lets you sign in with Spotify and see your top tracks and top artists, with a selectable time range.
+A Next.js app that lets you sign in with Spotify and see your top tracks and top artists, with a selectable time range, a Story experience, advanced stats, and shareable cards.
 
 ## Features
 
@@ -8,7 +8,15 @@ A Next.js app that lets you sign in with Spotify and see your top tracks and top
 - Automatic access token refresh
 - Top tracks and top artists
 - Time range selector: ~4 weeks, ~6 months, ~12 months
-- Protected `/dashboard` route
+- Protected `/dashboard` and `/dashboard/story` routes
+- **Interactive Story Mode (`/dashboard/story`)**: An Instagram-style story walkthrough summarizing your top artists, tracks, new discoveries, listening stats, and top decade.
+- **Advanced Listening Stats**:
+  - **Diversity Score**: Calculates artist variety across your top tracks.
+  - **Average Release Year & Top Decade**: Analyzes the average release date and main decade of your favorite music.
+- **Evolution & Comparison**: Compares short-term (~4 weeks) vs. long-term (~12 months) data to highlight:
+  - Discovered, loyal, and forgotten artists.
+  - New and dropped top tracks.
+- **Shareable Cards**: Generate and download image summaries (`wrapped.png`).
 
 ## Tech stack
 
